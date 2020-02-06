@@ -26,13 +26,6 @@ def showAll(a) :
     dataformatter = '<br/><br/>'.join(map(str, datafinal))#Permet de convertire la list en une chaine caractere
     return dataformatter
 
-@get("/show/all")#A COMPLETER OU ENLEVER
-def showDB():
-
-    data = json.loads(open("students.json").read())
-    return data
-
-
 @get("/show/everything/<name>") #Donne toutes les informations de la personne Name
 def showEverything(name) :
     data = json.loads(open("students.json").read())
@@ -211,7 +204,6 @@ def mainHTML():
     <button type="submit" formmethod="post">Pour effacer un etudiant</button>
     </form>
     """
-    
 
     formatt = "<h1 style=color:green;>::Server.py:: Choisir l'option desirer</h1>"
     
@@ -230,6 +222,7 @@ def postShowALL():
         </form>
         """
         informationPossible = """
+        <b>Informations possible pour la case Value : </b>
         <ul>
         <li>ID</li>
         <li>Name</li>
@@ -257,7 +250,6 @@ def postShowALL():
     else:
         return showAll(a), goBack
 
-
 @post("/show/everything")
 def postShowEverything():
 
@@ -273,7 +265,6 @@ def postShowEverything():
     else:
         return showEverything(name), goBack
 
-
 @post("/showRowNumber")
 def postShowRowNumber():
 
@@ -288,6 +279,7 @@ def postShowRowNumber():
         </form>
         """
         informationPossible = """
+        <b>Informations possible pour la case Value : </b>
         <ul>
         <li>ID</li>
         <li>Name</li>
@@ -331,7 +323,7 @@ def postCountAll():
         return count(name), goBack
 
 @post("/student/modify")
-def postREMOVE():
+def postModify():
 
     number = bottle.request.forms.get('number')
     value = bottle.request.forms.get('value')
@@ -347,6 +339,7 @@ def postREMOVE():
         </form>
         """
         informationPossible = """
+        <b>Informations possible pour la case Value : </b>
         <ul>
         <li>ID</li>
         <li>Name</li>
