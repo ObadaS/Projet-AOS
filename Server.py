@@ -172,7 +172,7 @@ def delete(name) :
 ####################################################################################
 #                                   Main                                           #
 ####################################################################################
-@route("/database/main", method=['GET', 'POST'])
+@route("/database/main", method=['GET', 'POST']) #Pour charger la page principal qui nous donne les options decrit plus bas, au lieu de devoir utiliser les URL pour lancer les fonctions.
 def mainHTML():
 
     formulaire = """
