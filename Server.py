@@ -7,8 +7,9 @@ from bs4 import BeautifulSoup
 from decimal import *
 from bottle import route, run, response, get, delete, put, post
 
+#Une "constante" globale pour pouvoir ajouter un bouton qui nous ramene au menu principale
 goBack = """</br><form action="/database/main" method="post">
-    <button type="submit" formmethod="post">Go back to previous page</button>
+    <button type="submit" formmethod="post">Go back to main menu</button>
     </form>
     """
 ####################################################################################
@@ -19,7 +20,7 @@ def showAll(a) :
     data = json.loads(open("students.json").read())
     datafinal = list()
 
-    if("Name" in a):
+    if("Name" in a): #Cas special si on demande le nom, on n'affichera que ca au lieu d'afficher l'information demandé + le nom
         for x in range(0, len(data)):
             datafinal.append(data[x][a])
 
@@ -499,9 +500,9 @@ def resultatProf() :
     totalAfficher = "<h3 style=color:green;>Total : " + str(count) + "</h3>" #Le str est necessaire, sinon ca renvoi une erreur (concatenate str et int)
 
     if(Date == "0"): #Le message change legerement si l'utilisateur rentre 0 comme date
-        return descriptifNomPrenom + typeDate0 + typeinformation + separateur + contenuInformationFinal +  totalAfficher
+        return descriptifNomPrenom + typeDate0 + typeinformation + separateur + contenuInformationFinal +  totalAfficher, goBack
     else:
-        return descriptifNomPrenom + typeDate + typeinformation + separateur + contenuInformationFinal + totalAfficher
+        return descriptifNomPrenom + typeDate + typeinformation + separateur + contenuInformationFinal + totalAfficher, goBack
 
 
 @route("/students/train", method=['GET', 'POST'])
