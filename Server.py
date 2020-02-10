@@ -82,6 +82,10 @@ def getAdd() :
 def getModify(number, value, new) :
     return modify(number, value, new)
 
+@get("/database/add/row/<a>/<b>") #Rajoute un row a toutes les données dans le fichier students.json avec a comme nom et b comme valeur
+def getrowAdd(a, b) :
+    return rowAdd(a,b)
+
 @get("/student/remove/<name>") #Efface toutes les informations de <name>
 def getDelete(name) :
     return delete(name)
@@ -92,29 +96,11 @@ def getDelete(name) :
 def add() :
     name = bottle.request.forms.get('name')
     data = json.loads(open("students.json").read())
-
-    modele = {
-    "ID": (len(data)+1),
-    "Name": name,
-    "Gender": "0",
-    "Class": "0",
-    "Seat": "0",
-    "Club": "0",
-    "Student ID": "0",
-    "Phone Number": "0",
-    "GPA": "0",
-    "Strength": "0",
-    "Hairstyle": "0",
-    "Color": "0",
-    "Eyes": "0",
-    "EyeType": "0",
-    "Random data": "0",
-    "Accessory": "0",
-    "ScheduleTime": "0",
-    "ScheduleDestination": "0",
-    "ScheduleAction": "0",
-    "Info": "0"
-    }
+    
+    modele = data[0]
+    modele = dict.fromkeys(modele, 0) #Remet toutes les valeurs a 0
+    modele["ID"] = len(data)+1 #On veux que le ID soit unique a chaque personne, et augment de 1 a chaque fois que on rajoute quelqun
+    modele["Name"] = name
 
     with open('students.json') as f:
         data = json.load(f)
@@ -147,6 +133,20 @@ def modify(number, value, new) :
     jsonFile.close()
     return value + " has been successfully changed to "+new
 
+@post("/database/add/row/<a>/<b>") #Rajoute un row a toutes les données dans le fichier students.json avec a comme nom et b comme valeur
+def rowAdd(a, b) :
+    jsonFile = open("students.json", "r")
+    data = json.load(jsonFile)
+    jsonFile.close()
+
+    for x in range(len(data)):
+        data[x][a] = b
+
+    jsonFile = open("students.json", "w")
+    json.dump(data, jsonFile)
+    jsonFile.close()
+
+    return "Le row "+ str(a)+" a ete rajouter avec la valeur "+str(b)+" avec succes" #TypeError vu que on veux "concatenate" des valeurs non str (les a et b) a des valeurs str
 ####################################################################################
 #                                   DELETE                                         #
 ####################################################################################
@@ -168,6 +168,7 @@ def delete(name) :
     
     for x in range(temp, len(data)):
         data[x]["ID"] = x+1
+
     jsonFile = open("students.json", "w")
     json.dump(data, jsonFile)
     jsonFile.close()
@@ -203,6 +204,10 @@ def mainHTML():
 
     <form action="/student/modify" method="post">
     <button type="submit" formmethod="post">Pour modifier la valeur d'une case d'un etudiant</button>
+    </form>
+
+    <form action="/database/add/row/" method="post">
+    <button type="submit" formmethod="post">Pour rajouter un nouveau Row dans le Database (pour tous les etudiants)</button>
     </form>
 
     <form action="/student/remove" method="post">
@@ -379,6 +384,25 @@ def postModify():
         return formulaireModify, informationPossible
     else:
         return modify(name), getBack
+
+
+@post("/database/add/row/")
+def postAddRow():
+    
+    a = bottle.request.forms.get('a')
+    b = bottle.request.forms.get('b')
+    
+    if(a is None):
+        formulaireRowAdd = """
+        <form  action="/database/add/row/" method='post'>
+        <input type='text'  name='a' placeholder='Le nom du Row'/>
+        <input type='text'  name='b' placeholder='La valeur du Row'/>
+        <input type='submit' value='Validez !'/>
+        </form>
+        """
+        return formulaireRowAdd
+    else:
+        return rowAdd(a,b), goBack
 
 @post("/student/remove")
 def postREMOVE():
