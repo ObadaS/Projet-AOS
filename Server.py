@@ -48,7 +48,6 @@ def showEverything(name) :
 
     for x in range(0, len(data)):
         if(name in data[x]["Name"]):
-            print(type(data[x]))
             return data[x]
 
     response.status = 404
@@ -297,7 +296,7 @@ def postShowEverything():
         """
         return formulaireShowEverything
     else:
-        return showEverything(name), goBack
+        return showEverything(name)
 
 @post("/showRowNumber")
 def postShowRowNumber():
