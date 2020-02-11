@@ -15,6 +15,13 @@ goBack = """</br><form action="/database/main">
 ####################################################################################
 #                                   GET                                            #
 ####################################################################################
+@route("/show/database", method=['GET', 'POST']) #Pour afficher toute la base de données
+def showDatabase() :
+    data = json.loads(open("students.json").read())
+    response.content_type = 'application/json'
+    
+    return json.dumps(data)
+
 @get("/show/all/<a>") #Le <a> permet de prendre la valeur et de l'utiliser plus bas (Donne toutes les donnée dont la valeur est a)
 def showAll(a) :
     data = json.loads(open("students.json").read())
@@ -31,7 +38,7 @@ def showAll(a) :
     dataformatter = '<br/><br/>'.join(map(str, datafinal))#Permet de convertire la list en une chaine caractere
     return dataformatter
 
-@route("/show/template", method=['GET', 'POST']) #Montre le modèle a jour de la base de donnée
+@route("/show/template", method=['GET', 'POST']) #Montre le modèle a jour de la base de données
 def showTemplate() :
     data = json.loads(open("students.json").read())
     temp = list()
@@ -40,7 +47,6 @@ def showTemplate() :
         temp.append(i+"</br>")
     
     return ''.join(map(str, temp)), goBack
-
 
 @get("/show/everything/<name>") #Donne toutes les informations de la personne Name
 def showEverything(name) :
@@ -193,6 +199,10 @@ def delete(name) :
 def mainHTML():
 
     formulaire = """
+    <form action="/show/database">
+    <button type="submit" formmethod="post">Affiche toute la base de données</button>
+    </form>
+
     <form action="/show/all">
     <button type="submit" formmethod="post">Donne toutes les donées de la valeur entré</button>
     </form>
@@ -238,7 +248,7 @@ def mainHTML():
     </form>
     """
    
-    formatt = "<h1 style=color:green;>::Server.py:: Choisir l'option desirer</h1>"
+    formatt = "<h1 style=color:green;>::Server.py:: Choisir l'option désirer</h1>"
     
     return formatt + formulaire
 
@@ -399,7 +409,6 @@ def postModify():
         return formulaireModify, informationPossible
     else:
         return modify(number, value, new), goBack
-
 
 @post("/database/add/row/")
 def postAddRow():
