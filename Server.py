@@ -296,7 +296,7 @@ def postShowEverything():
         """
         return formulaireShowEverything
     else:
-        return showEverything(name)
+        return showEverything(name) #On ne peux pas mettre goBack ici car firefox veux du json pour pouvoir afficher et goback n'est pas du json donc ca donne une erreur
 
 @post("/showRowNumber")
 def postShowRowNumber():
