@@ -206,6 +206,10 @@ def mainHTML():
     <button type="submit" formmethod="post">Pour chercher le row number</button>
     </form>
 
+    <form action="/student/modify">
+    <button type="submit" formmethod="post">Pour modifier la valeur d'une case d'un étudiant</button>
+    </form>
+
     <form action="/count/all" method="post">
     <button type="submit" formmethod="post">Pour compter le nombre d'étudiant ayant le meme nom</button>
     </form>
@@ -214,16 +218,16 @@ def mainHTML():
     <button type="submit" formmethod="post">Rajoute un nouvel étudiant</button>
     </form>
 
-    <form action="/student/modify">
-    <button type="submit" formmethod="post">Pour modifier la valeur d'une case d'un étudiant</button>
+    <form action="/student/remove">
+    <button type="submit" formmethod="post">Pour effacer un étudiant</button>
     </form>
 
     <form action="/database/add/row/">
     <button type="submit" formmethod="post">Pour rajouter une nouvelle clé dans le Database (pour tous les étudiants)</button>
     </form>
 
-    <form action="/student/remove">
-    <button type="submit" formmethod="post">Pour effacer un étudiant</button>
+    <form action="/show/template">
+    <button type="submit" formmethod="post">Montre le modèle à jour</button>
     </form>
 
     <form action="/professor/published">
@@ -232,10 +236,6 @@ def mainHTML():
     
     <form action="/students/train">
     <button type="submit" formmethod="post">Cherche le prochain train</button>
-    </form>
-
-    <form action="/show/template">
-    <button type="submit" formmethod="post">Montre le modèle à jour</button>
     </form>
     """
    
@@ -399,7 +399,7 @@ def postModify():
         """
         return formulaireModify, informationPossible
     else:
-        return modify(name), getBack
+        return modify(number, value, new), goBack
 
 
 @post("/database/add/row/")
