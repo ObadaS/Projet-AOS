@@ -8,7 +8,7 @@ from decimal import *
 from bottle import route, run, response, get, delete, put, post
 
 #Une "constante" globale pour pouvoir ajouter un bouton qui nous ramene au menu principale
-goBack = """</br><form action="/database/main" method="post">
+goBack = """</br><form action="/database/main">
     <button type="submit" formmethod="post">Go back to main menu</button>
     </form>
     """
@@ -31,12 +31,24 @@ def showAll(a) :
     dataformatter = '<br/><br/>'.join(map(str, datafinal))#Permet de convertire la list en une chaine caractere
     return dataformatter
 
+@route("/show/template", method=['GET', 'POST']) #Montre le modèle a jour de la base de donnée
+def showTemplate() :
+    data = json.loads(open("students.json").read())
+    temp = list()
+
+    for i in data[0] :
+        temp.append(i+"</br>")
+    
+    return ''.join(map(str, temp)), goBack
+
+
 @get("/show/everything/<name>") #Donne toutes les informations de la personne Name
 def showEverything(name) :
     data = json.loads(open("students.json").read())
 
     for x in range(0, len(data)):
         if(name in data[x]["Name"]):
+            print(type(data[x]))
             return data[x]
 
     response.status = 404
@@ -54,7 +66,7 @@ def showRowNumber(value, name) :
     response.status = 404
     return name +' not found'
 
-@get("/count/all/<name>")#Retourne le nombre d'etudiants avec le meme nom name
+@get("/count/all/<name>")#Retourne le nombre d'étudiants avec le meme nom name
 def count(name):
     data = json.loads(open("students.json").read())
     count = 0
@@ -82,9 +94,9 @@ def getAdd() :
 def getModify(number, value, new) :
     return modify(number, value, new)
 
-@get("/database/add/row/<a>/<b>") #Rajoute un row a toutes les données dans le fichier students.json avec a comme nom et b comme valeur
-def getrowAdd(a, b) :
-    return rowAdd(a,b)
+@get("/database/add/row/<key>/<value>") #Rajoute un couple clé/valeur a toutes les données dans le fichier students.json
+def getrowAdd(key, value) :
+    return rowAdd(key, value)
 
 @get("/student/remove/<name>") #Efface toutes les informations de <name>
 def getDelete(name) :
@@ -97,21 +109,35 @@ def add() :
     name = bottle.request.forms.get('name')
     data = json.loads(open("students.json").read())
     
-    modele = data[0]
-    modele = dict.fromkeys(modele, 0) #Remet toutes les valeurs a 0
-    modele["ID"] = len(data)+1 #On veux que le ID soit unique a chaque personne, et augment de 1 a chaque fois que on rajoute quelqun
-    modele["Name"] = name
+    modèle = data[0]
+    modèle = dict.fromkeys(modèle, 0) #Remet toutes les valeurs a 0
+    modèle["ID"] = len(data)+1 #On veux que le ID soit unique a chaque personne, et augment de 1 a chaque fois que on rajoute quelqun
+    modèle["Name"] = name
 
     with open('students.json') as f:
         data = json.load(f)
 
-    data.append(modele)
+    data.append(modèle)
 
     with open('students.json', 'w') as f:
         json.dump(data, f)
 
     return 'Added ' + name, goBack
 
+@post("/database/add/row/<key>/<value>") #Rajoute un row à toutes les données dans le fichier students.json
+def rowAdd(key, value) :
+    jsonFile = open("students.json", "r")
+    data = json.load(jsonFile)
+    jsonFile.close()
+
+    for x in range(len(data)):
+        data[x][key] = value
+
+    jsonFile = open("students.json", "w")
+    json.dump(data, jsonFile)
+    jsonFile.close()
+
+    return "Le row "+ str(key)+" à été rajouté avec la valeur "+str(value)+" avec succes" #TypeError vu que on veux "concatenate" des valeurs non str (les key et value) à des valeurs str
 ####################################################################################
 #                                   PUT                                            #
 ####################################################################################
@@ -133,20 +159,6 @@ def modify(number, value, new) :
     jsonFile.close()
     return value + " has been successfully changed to "+new
 
-@post("/database/add/row/<a>/<b>") #Rajoute un row a toutes les données dans le fichier students.json avec a comme nom et b comme valeur
-def rowAdd(a, b) :
-    jsonFile = open("students.json", "r")
-    data = json.load(jsonFile)
-    jsonFile.close()
-
-    for x in range(len(data)):
-        data[x][a] = b
-
-    jsonFile = open("students.json", "w")
-    json.dump(data, jsonFile)
-    jsonFile.close()
-
-    return "Le row "+ str(a)+" a ete rajouter avec la valeur "+str(b)+" avec succes" #TypeError vu que on veux "concatenate" des valeurs non str (les a et b) a des valeurs str
 ####################################################################################
 #                                   DELETE                                         #
 ####################################################################################
@@ -176,50 +188,54 @@ def delete(name) :
 
 
 ####################################################################################
-#                                   Main                                           #
+#                                   "UI"                                           #
 ####################################################################################
 @route("/database/main", method=['GET', 'POST']) #Pour charger la page principal qui nous donne les options decrit plus bas, au lieu de devoir utiliser les URL pour lancer les fonctions.
 def mainHTML():
 
     formulaire = """
-    <form action="/show/all" method="post">
+    <form action="/show/all">
     <button type="submit" formmethod="post">Donne toutes les donées de la valeur entré</button>
     </form>
 
-    <form action="/show/everything" method="post">
-    <button type="submit" formmethod="post">Pour donnée toutes les informations de l'etudiant</button>
+    <form action="/show/everything">
+    <button type="submit" formmethod="post">Pour donnée toutes les informations de l'étudiant</button>
     </form>
 
-    <form action="/showRowNumber" method="post">
+    <form action="/showRowNumber">
     <button type="submit" formmethod="post">Pour chercher le row number</button>
     </form>
 
     <form action="/count/all" method="post">
-    <button type="submit" formmethod="post">Pour compter le nombre d'etudiant ayant le meme nom</button>
+    <button type="submit" formmethod="post">Pour compter le nombre d'étudiant ayant le meme nom</button>
     </form>
 
-    <form action="/student/add" method="post">
-    <button type="submit" formmethod="post">Rajoute un nouvel etudiant</button>
+    <form action="/student/add">
+    <button type="submit" formmethod="post">Rajoute un nouvel étudiant</button>
     </form>
 
-    <form action="/student/modify" method="post">
-    <button type="submit" formmethod="post">Pour modifier la valeur d'une case d'un etudiant</button>
+    <form action="/student/modify">
+    <button type="submit" formmethod="post">Pour modifier la valeur d'une case d'un étudiant</button>
     </form>
 
-    <form action="/database/add/row/" method="post">
-    <button type="submit" formmethod="post">Pour rajouter un nouveau Row dans le Database (pour tous les etudiants)</button>
+    <form action="/database/add/row/">
+    <button type="submit" formmethod="post">Pour rajouter une nouvelle clé dans le Database (pour tous les étudiants)</button>
     </form>
 
-    <form action="/student/remove" method="post">
-    <button type="submit" formmethod="post">Pour effacer un etudiant</button>
+    <form action="/student/remove">
+    <button type="submit" formmethod="post">Pour effacer un étudiant</button>
     </form>
 
-    <form action="/professor/published" method="post">
+    <form action="/professor/published">
     <button type="submit" formmethod="post">Cherche les publication d'un professeur</button>
     </form>
     
-    <form action="/students/train" method="post">
+    <form action="/students/train">
     <button type="submit" formmethod="post">Cherche le prochain train</button>
+    </form>
+
+    <form action="/show/template">
+    <button type="submit" formmethod="post">Montre le modèle à jour</button>
     </form>
     """
    
@@ -228,7 +244,7 @@ def mainHTML():
     return formatt + formulaire
 
 
-@post("/show/all") #Pour enlever un etudiant via "GUI"
+@post("/show/all") 
 def postShowALL():
 
     a = bottle.request.forms.get('a')
@@ -332,7 +348,7 @@ def postCountAll():
     if(name is None):
         formulaireCountAll = """
         <form  action="/count/all" method='post'>
-        <input type='text'  name='name' placeholder='Le nom de l'etudiant/>
+        <input type='text'  name='name' placeholder='Le nom de l'étudiant/>
         <input type='submit' value='Validez !'/>
         </form>
         """
@@ -389,20 +405,20 @@ def postModify():
 @post("/database/add/row/")
 def postAddRow():
     
-    a = bottle.request.forms.get('a')
-    b = bottle.request.forms.get('b')
+    key = bottle.request.forms.get('key')
+    value = bottle.request.forms.get('value')
     
-    if(a is None):
+    if(key is None):
         formulaireRowAdd = """
         <form  action="/database/add/row/" method='post'>
-        <input type='text'  name='a' placeholder='Le nom du Row'/>
-        <input type='text'  name='b' placeholder='La valeur du Row'/>
+        <input type='text'  name='key' placeholder='Le nom de la clé'/>
+        <input type='text'  name='value' placeholder='La valeur de la clé'/>
         <input type='submit' value='Validez !'/>
         </form>
         """
         return formulaireRowAdd
     else:
-        return rowAdd(a,b), goBack
+        return rowAdd(key, value), goBack
 
 @post("/student/remove")
 def postREMOVE():
@@ -419,8 +435,10 @@ def postREMOVE():
     else:
         return delete(name), goBack
 
-
-@route("/professor/published", method=['GET', 'POST'])
+####################################################################################
+#                                   API externe                                    #
+####################################################################################
+@route("/professor/published", method=['GET', 'POST'])#Permet de chercher les ouvrages publié par un professeur
 def Prof() :
     formulaire = """
     <form method='post' action='/professor/published/results'>
@@ -528,8 +546,7 @@ def resultatProf() :
     else:
         return descriptifNomPrenom + typeDate + typeinformation + separateur + contenuInformationFinal + totalAfficher, goBack
 
-
-@route("/students/train", method=['GET', 'POST'])
+@route("/students/train", method=['GET', 'POST'])#Permet de trouve les horaires des prochains train departant une gare donnée par l'utilisateur
 def getnextTrain() :
     formulaire = """
     <form method='post' action='/students/train/next'>
